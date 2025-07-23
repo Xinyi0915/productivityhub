@@ -1,0 +1,74 @@
+/* Import Tailwind CSS utility classes */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Set the base font family for the entire application */
+@layer base {
+  html {
+    font-family: Inter, system-ui, sans-serif;
+  }
+}
+
+/* Custom component classes built with Tailwind's @apply directive */
+@layer components {
+  /* Primary button styling - used for main actions */
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors;
+  }
+
+  /* Secondary button styling - used for less important actions */
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors;
+  }
+
+  /* Standard input styling with focus states */
+  .input-primary {
+    @apply px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+}
+
+/* Custom scrollbar styling for better UX on desktop browsers */
+/* Width of the scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track (background) of the scrollbar */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle (draggable part) of the scrollbar */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+/* Handle on hover - darkens for better visibility */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Additional thin scrollbar specifically for charts and small containers */
+/* Smaller width for both vertical and horizontal scrollbars */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Lighter background for less visual impact */
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: #f9f9f9;
+}
+
+/* Lighter thumb color for subtle appearance */
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #cdcdcd;
+  border-radius: 4px;
+}
+
+/* Darker on hover but still relatively subtle */
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+} 
