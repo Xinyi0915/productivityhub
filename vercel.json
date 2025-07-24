@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "installCommand": "npm install",
   "routes": [
     {
       "src": "/assets/(.*)",
@@ -16,5 +17,9 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VITE_SITE_URL": "https://productivityhub.vercel.app",
+    "VITE_SITE_NAME": "Productivity Hub"
+  }
 } 
