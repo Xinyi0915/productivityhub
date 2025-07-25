@@ -4,6 +4,12 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "npm install",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "functions": {},
   "routes": [
     {
       "src": "/assets/(.*)",

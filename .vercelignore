@@ -1,0 +1,6 @@
+# Vercel ignore patterns
+node_modules
+.git
+*.log
+.env.local
+.env.*.local 
