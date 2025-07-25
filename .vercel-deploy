@@ -1,0 +1,9 @@
+# Deployment Trigger - Force Fresh Build
+# Timestamp: 2024-01-20 00:09:00
+# Latest commit should be: 396c1d3
+# Fixed TypeScript configuration and build script
+# This file forces Vercel to recognize changes
+
+DEPLOY_VERSION=2024.01.20.1
+TYPESCRIPT_STRICT=false
+BUILD_COMMAND=vite_build_only 
