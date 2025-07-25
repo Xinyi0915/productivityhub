@@ -5,7 +5,7 @@ import { AppDispatch } from '..';
 // We need to handle circular dependency, so declare the import type
 type FetchTasksAction = () => any;
 type FetchHabitsAction = () => any;
-type FetchTimerSessionsAction = () => any;
+type FetchTimerSessionsAction = (params?: { limit?: number; page?: number }) => any;
 type FetchPlantsAction = () => any;
 
 // Declare variables to hold the imported functions

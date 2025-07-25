@@ -10,6 +10,7 @@ interface AuthResponse {
     email: string;
     username: string;
     coins: number;
+    role: string;  // Added role field
   };
   token: string;
 }
@@ -40,6 +41,7 @@ const AuthPage = () => {
               email,
               username: username || email.split('@')[0],
               coins: 10, // Start with 10 coins
+              role: 'user', // Default role
             },
             token: 'dummy-token',
           });

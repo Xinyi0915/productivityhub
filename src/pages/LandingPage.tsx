@@ -10,7 +10,7 @@ const LandingPage = () => {
     {
       icon: '⏱️',
       title: 'Focus Timer',
-      description: 'Stay productive with our customizable Pomodoro timer.',
+      description: 'Stay productive with our customizable timer.',
     },
     {
       icon: '📊',

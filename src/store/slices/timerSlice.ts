@@ -1,59 +1,65 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { AppDispatch } from '..';
-import { updateCoins, registerFetchTimerSessions } from './authSlice';
+import { AppDispatch, RootState } from '..';
+import { fetchTimerSessions as fetchTimerSessionsService, createTimerSession as createTimerSessionService, TimerSession } from '../../services/timerSessions';
+import { updateCoins, registerFetchTimerSessions } from '../slices/authSlice';
 import { sendTimerCompletionNotification, sendCoinEarnedNotification, sendTaskCompletionNotification } from '../../utils/notifications';
 import { playNotificationSound, startWhiteNoise, stopWhiteNoise, setWhiteNoiseVolume, NoiseType, stopNotificationSound } from '../../utils/sounds';
-import * as timerSessionsService from '../../services/timerSessions';
 
-export interface TimerSession {
-  id: string;
-  duration: number;
-  startTime: string;
-  endTime: string;
-  coinsEarned: number;
-}
+
 
 interface TimerState {
   isRunning: boolean;
-  currentSession: TimerSession | null;
-  selectedDuration: number; // in minutes
-  timeRemaining: number; // in seconds
+  timeLeft: number;
+  timeRemaining: number;
+  sessionDuration: number;
+  breakDuration: number;
+  selectedDuration: number;
+  isBreak: boolean;
   sessions: TimerSession[];
-  totalCoinsEarned: number;
+  currentSession: TimerSession | null;
   totalFocusMinutes: number;
-  presetDurations: number[]; // in minutes
+  totalSessions: number;
+  totalCoinsEarned: number;
   whiteNoiseEnabled: boolean;
   whiteNoiseVolume: number;
   noiseType: NoiseType;
+  intervalId: number | null;
+  presetDurations: number[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: TimerState = {
   isRunning: false,
-  currentSession: null,
-  selectedDuration: 25,
+  timeLeft: 25 * 60, // 25 minutes in seconds
   timeRemaining: 25 * 60,
+  sessionDuration: 25 * 60,
+  breakDuration: 5 * 60,
+  selectedDuration: 25,
+  isBreak: false,
   sessions: [],
-  totalCoinsEarned: 0,
+  currentSession: null,
   totalFocusMinutes: 0,
-  presetDurations: [15, 25, 30, 45, 60],
+  totalSessions: 0,
+  totalCoinsEarned: 0,
   whiteNoiseEnabled: false,
-  whiteNoiseVolume: 0.1,
-  noiseType: 'white',
+  whiteNoiseVolume: 0.5,
+  noiseType: 'white' as NoiseType,
+  intervalId: null,
+  presetDurations: [5, 15, 25, 45, 60],
   loading: false,
-  error: null,
+  error: null
 };
 
 // Keep track of the current interval
-let currentInterval: NodeJS.Timeout | null = null;
+let currentInterval: ReturnType<typeof setInterval> | null = null;
 
 // Async thunks
 export const fetchTimerSessions = createAsyncThunk(
   'timer/fetchSessions',
   async (params: { limit?: number; page?: number } = {}, { rejectWithValue }) => {
     try {
-      const response = await timerSessionsService.fetchTimerSessions(params);
+      const response = await fetchTimerSessionsService(params);
       return response.sessions;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch timer sessions');
@@ -65,7 +71,7 @@ export const saveTimerSession = createAsyncThunk(
   'timer/saveSession',
   async (session: TimerSession, { rejectWithValue }) => {
     try {
-      return await timerSessionsService.createTimerSession(session);
+      return await createTimerSessionService(session);
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to save timer session');
     }
@@ -114,7 +120,7 @@ export const handleTimerCompletion = () => async (dispatch: AppDispatch, getStat
   
   // Send notifications
   sendTimerCompletionNotification(dispatch as AppDispatch, actualDuration);
-  sendCoinEarnedNotification(dispatch as AppDispatch, coinsEarned, `completing a ${actualDuration}-minute focus session`);
+  sendCoinEarnedNotification(coinsEarned, `completing a ${actualDuration}-minute focus session`);
   
   // Create completed session
   const completedSession = {
@@ -161,8 +167,8 @@ export const completeTimerSession = () => async (dispatch: AppDispatch, getState
     dispatch(updateCoins(currentUserCoins + coinsEarned));
     
     // Send notifications
-    sendTaskCompletionNotification(dispatch as AppDispatch, actualDuration);
-    sendCoinEarnedNotification(dispatch as AppDispatch, coinsEarned, `completing a ${actualDuration}-minute focus session`);
+    sendTimerCompletionNotification(dispatch as AppDispatch, actualDuration);
+    sendCoinEarnedNotification(coinsEarned, `completing a ${actualDuration}-minute focus session`);
     
     // Override the session duration with actual time spent
     const updatedSession = {
@@ -314,7 +320,7 @@ const timerSlice = createSlice({
         startWhiteNoise(state.noiseType, state.whiteNoiseVolume);
       }
     },
-    setWhiteNoiseVolume: (state, action: PayloadAction<number>) => {
+    setWhiteNoiseVolumeSlice: (state, action: PayloadAction<number>) => {
       state.whiteNoiseVolume = action.payload;
       
       // Update volume if white noise is enabled
@@ -344,8 +350,8 @@ const timerSlice = createSlice({
         state.sessions = action.payload;
         
         // Calculate totals
-        state.totalCoinsEarned = action.payload.reduce((total, session) => total + session.coinsEarned, 0);
-        state.totalFocusMinutes = action.payload.reduce((total, session) => total + session.duration, 0);
+        state.totalCoinsEarned = action.payload.reduce((total: number, session: TimerSession) => total + session.coinsEarned, 0);
+        state.totalFocusMinutes = action.payload.reduce((total: number, session: TimerSession) => total + session.duration, 0);
       })
       .addCase(fetchTimerSessions.rejected, (state, action) => {
         state.loading = false;
@@ -379,7 +385,7 @@ export const {
   addCustomDuration,
   removeCustomDuration,
   setWhiteNoiseEnabled,
-  setWhiteNoiseVolume,
+  setWhiteNoiseVolumeSlice: setWhiteNoiseVolume,
   setNoiseType,
 } = timerSlice.actions;
 
